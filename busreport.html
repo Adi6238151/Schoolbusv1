@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>School Bus Route Optimization Platform - Reports</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            overflow: hidden;
+        }
+        .sidebar {
+            background-color: #29487d;
+            color: white;
+            height: 100%;
+            width: 250px;
+            padding: 20px;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: fixed;
+            left: -250px;
+            transition: all 0.3s;
+        }
+        .sidebar.active {
+            left: 0;
+        }
+        .logo {
+            background-color: #5c82d6;
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .menu {
+            list-style-type: none;
+            padding: 0;
+            flex-grow: 1;
+        }
+        .menu li {
+            margin-bottom: 20px;
+        }
+        .menu li a {
+            color: white;
+            text-decoration: none;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            padding: 10px 15px;
+            border-radius: 5px;
+        }
+        .menu li a:hover {
+            background-color: #3b5998;
+        }
+        .menu li a i {
+            margin-right: 10px;
+        }
+        .submenu {
+            list-style-type: none;
+            padding: 0;
+            margin-top: 10px;
+            margin-left: 20px;
+            display: none;
+        }
+        .submenu.collapse.show {
+            display: block;
+        }
+        .submenu li a {
+            font-size: 14px;
+        }
+        .content {
+            flex-grow: 1;
+            padding: 20px;
+            overflow: auto;
+            margin-left: 0;
+            transition: margin-left 0.3s;
+        }
+        .content.active {
+            margin-left: 250px;
+        }
+        .background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('A_modern_office_building_with_a_sleek_glass_exteri.png') no-repeat center center fixed;
+            background-size: cover;
+            opacity: 0.5;
+            z-index: -1;
+        }
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 20px;
+            background-color: rgba(255, 255, 255, 0.8);
+            z-index: 1;
+            width: 100%;
+        }
+        .topbar a {
+            color: #000;
+            text-decoration: none;
+            margin: 0 15px;
+            font-size: 16px;
+        }
+        .topbar a:hover {
+            text-decoration: underline;
+        }
+        .reports-tabs {
+            background-color: #5c82d6;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+        }
+        .reports-tabs a {
+            color: white;
+            text-decoration: none;
+            font-size: 14px;
+            padding: 5px 10px;
+        }
+        .reports-tabs a:hover {
+            text-decoration: underline;
+        }
+        .report-section {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+        }
+        .report-section .bus-info {
+            background-color: rgba(255, 255, 255, 0.8);
+            border: 1px solid #0000ff;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 10px;
+            flex: 1 1 30%;
+            max-width: 30%;
+            box-sizing: border-box;
+        }
+        .report-section .chart {
+            background-color: rgba(255, 255, 255, 0.8);
+            border: 1px solid #0000ff;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 10px;
+            flex: 1 1 30%;
+            max-width: 30%;
+            box-sizing: border-box;
+        }
+        .bus-info img {
+            max-width: 100%;
+            height: auto;
+            margin-bottom: 10px;
+        }
+        .chart h3 {
+            color: #0000ff;
+            font-size: 14px;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        .chart canvas {
+            max-width: 100%;
+            height: 150px;
+        }
+        .footer {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: auto;
+            padding: 10px 20px;
+            background-color: rgba(255, 255, 255, 0.8);
+            z-index: 1;
+            width: 100%;
+        }
+        .footer a {
+            color: white;
+            text-decoration: none;
+            background-color: #5c82d6;
+            padding: 5px 10px;
+            border-radius: 5px;
+            margin-left: 10px;
+        }
+        .footer a:hover {
+            background-color: #3b5998;
+        }
+        @media (max-width: 992px) {
+            .sidebar {
+                left: -250px;
+            }
+            .sidebar.active {
+                left: 0;
+            }
+            .content {
+                margin-left: 0;
+            }
+            .content.active {
+                margin-left: 250px;
+            }
+            .reports-tabs {
+                flex-direction: column;
+                align-items: center;
+            }
+            .report-section {
+                flex-direction: column;
+                align-items: center;
+            }
+            .report-section .bus-info, .report-section .chart {
+                max-width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar" id="sidebar">
+        <div class="logo">LOGO</div>
+        <ul class="menu">
+            <li>
+                <a href="home.html"><i class="fas fa-home"></i> Home</a>
+            </li>
+            <li>
+                <a href="#" data-toggle="collapse" data-target="#adminSubmenu" aria-expanded="false" aria-controls="adminSubmenu"><i class="fas fa-user"></i> School Bus Administrators</a>
+                <ul class="submenu collapse" id="adminSubmenu">
+                    <li><a href="admin.html" class="nav-link">School buses</a></li>
+                    <li><a href="student_management.html" class="nav-link">Student Management</a></li>
+                    <li><a href="route_optimization.html" class="nav-link">Route Optimization</a></li>
+                    <li><a href="geofencing.html" class="nav-link">Geofencing</a></li>
+                    <li><a href="bus_driver_management.html" class="nav-link">Bus & Driver Management</a></li>
+                    <li><a href="reports.html" class="nav-link active">Reports</a></li>
+                    <li><a href="settings.html" class="nav-link">Settings</a></li>
+                </ul>
+            </li>
+            <li><a href="#"><i class="fas fa-bell"></i> Notification</a></li>
+            <li><a href="#"><i class="fas fa-cog"></i> Settings</a></li>
+            <li><a href="#"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+            <li><a href="#"><i class="fas fa-user-circle"></i> Account</a></li>
+            <li><a href="#"><i class="fas fa-question-circle"></i> Help</a></li>
+        </ul>
+    </div>
+
+    <div class="content" id="content">
+        <div class="background"></div>
+        <div class="topbar">
+            <button class="btn btn-outline-secondary" id="sidebarToggle"><i class="fas fa-bars"></i></button>
+            <div>
+                <a href="home.html">Home</a>
+                <a href="features.html">Features</a>
+                <a href="#">Contacts</a>
+                <a href="#">About Us</a>
+            </div>
+        </div>
+        <div class="reports-tabs">
+            <a href="busreport.html">Bus Report</a>
+            <a href="Driverreport.html">Driver Report</a>
+            <a href="#">Student Report</a>
+            <a href="#">Route Report</a>
+            <a href="#">Custom Report</a>
+        </div>
+        <div class="filter-group">
+            <input type="date" placeholder="Start Date">
+            <input type="date" placeholder="End Date">
+            <button>Okay</button>
+        </div>
+        <div class="report-section">
+            <div class="bus-info">
+                <img src="path_to_bus_image.png" alt="School Bus Image">
+                <p>Vehicle No:</p>
+                <p>Number of Students:</p>
+                <p>Seating Capacity:</p>
+                <p>Starting Point:</p>
+                <p>No. of stops:</p>
+                <p>Route ID:</p>
+                <p>Maintenance Status:</p>
+                <p>Model:</p>
+                <p>Make:</p>
+            </div>
+            <div class="chart">
+                <h3>Avg Speed & Fuel Consumption</h3>
+                <canvas id="avgSpeedFuelChart"></canvas>
+                <h3>Total Distance Traveled</h3>
+                <canvas id="totalDistanceChart"></canvas>
+            </div>
+            <div class="chart">
+                <h3>Maintenance Status</h3>
+                <canvas id="maintenanceStatusChart"></canvas>
+                <h3>List of Stops</h3>
+                <canvas id="listOfStopsChart"></canvas>
+            </div>
+        </div>
+        <div class="footer">
+            <a href="#">Privacy Policy</a>
+            <a href="#">Terms & services</a>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        document.getElementById('sidebarToggle').addEventListener('click', function () {
+            document.getElementById('sidebar').classList.toggle('active');
+            document.getElementById('content').classList.toggle('active');
+        });
+
+        const avgSpeedFuelCtx = document.getElementById('avgSpeedFuelChart').getContext('2d');
+        const maintenanceStatusCtx = document.getElementById('maintenanceStatusChart').getContext('2d');
+        const totalDistanceCtx = document.getElementById('totalDistanceChart').getContext('2d');
+        const listOfStopsCtx = document.getElementById('listOfStopsChart').getContext('2d');
+
+        new Chart(avgSpeedFuelCtx, {
+            type: 'bar',
+            data: {
+                labels: ['Speed', 'Fuel Consumption'],
+                datasets: [{
+                    label: 'Avg Speed & Fuel Consumption',
+                    data: [65, 59],
+                    backgroundColor: ['#3b5998', '#8b9dc3'],
+                    borderColor: ['#3b5998', '#8b9dc3'],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+
+        new Chart(maintenanceStatusCtx, {
+            type: 'pie',
+            data: {
+                labels: ['Active', 'Completed', 'Due'],
+                datasets: [{
+                    label: 'Maintenance Status',
+                    data: [27.8, 61.1, 11.1],
+                    backgroundColor: ['#3b5998', '#8b9dc3', '#dfe3ee'],
+                    borderColor: ['#3b5998', '#8b9dc3', '#dfe3ee'],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true
+            }
+        });
+
+        new Chart(totalDistanceCtx, {
+            type: 'line',
+            data: {
+                labels: ['Item 1', 'Item 2', 'Item 3', 'Item 4', 'Item 5'],
+                datasets: [{
+                    label: 'Total Distance Traveled',
+                    data: [10, 20, 30, 40, 50],
+                    backgroundColor: '#3b5998',
+                    borderColor: '#3b5998',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+
+        new Chart(listOfStopsCtx, {
+            type: 'line',
+            data: {
+                labels: ['AM', 'PM'],
+                datasets: [{
+                    label: 'List of Stops',
+                    data: [15, 30],
+                    backgroundColor: '#3b5998',
+                    borderColor: '#3b5998',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>School Bus Route Optimization Platform - Geofencing</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            height: 100vh;
+            display: flex;
+        }
+        .sidebar {
+            background-color: #29487d;
+            color: white;
+            height: 100%;
+            width: 250px;
+            padding: 20px;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: fixed;
+            left: -250px;
+            transition: all 0.3s;
+        }
+        .sidebar.active {
+            left: 0;
+        }
+        .logo {
+            background-color: #5c82d6;
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .menu {
+            list-style-type: none;
+            padding: 0;
+            flex-grow: 1;
+        }
+        .menu li {
+            margin-bottom: 20px;
+        }
+        .menu li a {
+            color: white;
+            text-decoration: none;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            padding: 10px 15px;
+            border-radius: 5px;
+        }
+        .menu li a:hover {
+            background-color: #3b5998;
+        }
+        .menu li a i {
+            margin-right: 10px;
+        }
+        .submenu {
+            list-style-type: none;
+            padding: 0;
+            margin-top: 10px;
+            margin-left: 20px;
+            display: none;
+        }
+        .submenu.collapse.show {
+            display: block;
+        }
+        .submenu li a {
+            font-size: 14px;
+        }
+        .content {
+            flex-grow: 1;
+            padding: 20px;
+            overflow: auto;
+            margin-left: 0;
+            transition: margin-left 0.3s;
+        }
+        .content.active {
+            margin-left: 250px;
+        }
+        .background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('A_modern_office_building_with_a_sleek_glass_exteri.png') no-repeat center center fixed;
+            background-size: cover;
+            opacity: 0.5;
+            z-index: -1;
+        }
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 20px;
+            background-color: rgba(255, 255, 255, 0.8);
+            z-index: 1;
+            width: 100%;
+        }
+        .topbar a {
+            color: #000;
+            text-decoration: none;
+            margin: 0 15px;
+            font-size: 16px;
+        }
+        .topbar a:hover {
+            text-decoration: underline;
+        }
+        .geofence-management {
+            background-color: rgba(255, 255, 255, 0.8);
+            border: 1px solid #0000ff;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .geofence-management h3 {
+            color: #0000ff;
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+        .geofence-management input, .geofence-management select, .geofence-management button {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            font-size: 14px;
+        }
+        .geofence-management button {
+            background-color: #5c82d6;
+            color: white;
+            cursor: pointer;
+        }
+        .geofence-management button:hover {
+            background-color: #3b5998;
+        }
+        .map {
+            width: 100%;
+            height: 300px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        .geofence-monitoring {
+            background-color: rgba(255, 255, 255, 0.8);
+            border: 1px solid #0000ff;
+            border-radius: 10px;
+            padding: 20px;
+        }
+        .geofence-monitoring h3 {
+            color: #0000ff;
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+        .geofence-monitoring table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .geofence-monitoring th, .geofence-monitoring td {
+            padding: 10px;
+            text-align: center;
+            border: 1px solid #0000ff;
+        }
+        .geofence-monitoring th {
+            background-color: #5c82d6;
+            color: white;
+        }
+        .geofence-monitoring tbody tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        .footer {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: auto;
+            padding: 10px 20px;
+            background-color: rgba(255, 255, 255, 0.8);
+            z-index: 1;
+            width: 100%;
+        }
+        .footer a {
+            color: white;
+            text-decoration: none;
+            background-color: #5c82d6;
+            padding: 5px 10px;
+            border-radius: 5px;
+            margin-left: 10px;
+        }
+        .footer a:hover {
+            background-color: #3b5998;
+        }
+        @media (max-width: 992px) {
+            .sidebar {
+                left: -250px;
+            }
+            .sidebar.active {
+                left: 0;
+            }
+            .content {
+                margin-left: 0;
+            }
+            .content.active {
+                margin-left: 250px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar" id="sidebar">
+        <div class="logo">LOGO</div>
+        <ul class="menu">
+            <li>
+                <a href="home.html"><i class="fas fa-home"></i> Home</a>
+            </li>
+            <li>
+                <a href="#" data-toggle="collapse" data-target="#adminSubmenu" aria-expanded="false" aria-controls="adminSubmenu"><i class="fas fa-user"></i> School Bus Administrators</a>
+                <ul class="submenu collapse" id="adminSubmenu">
+                    <li><a href="admin.html" class="nav-link">School buses</a></li>
+                    <li><a href="student_management.html" class="nav-link">Student Management</a></li>
+                    <li><a href="route_optimization.html" class="nav-link">Route Optimization</a></li>
+                    <li><a href="geofencing.html" class="nav-link active">Geofencing</a></li>
+                    <li><a href="bus_driver_management.html" class="nav-link">Bus & Driver Management</a></li>
+                    <li><a href="busreport.html" class="nav-link">Reports</a></li>
+                    <li><a href="settings.html" class="nav-link">Settings</a></li>
+                </ul>
+            </li>
+            <li><a href="#"><i class="fas fa-bell"></i> Notification</a></li>
+            <li><a href="#"><i class="fas fa-cog"></i> Settings</a></li>
+            <li><a href="#"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+            <li><a href="#"><i class="fas fa-user-circle"></i> Account</a></li>
+            <li><a href="#"><i class="fas fa-question-circle"></i> Help</a></li>
+        </ul>
+    </div>
+
+    <div class="content" id="content">
+        <div class="background"></div>
+        <div class="topbar">
+            <button class="btn btn-outline-secondary" id="sidebarToggle"><i class="fas fa-bars"></i></button>
+            <div>
+                <a href="home.html">Home</a>
+                <a href="features.html">Features</a>
+                <a href="#">Contacts</a>
+                <a href="#">About Us</a>
+            </div>
+        </div>
+        <div class="geofence-management">
+            <h3>Geofence Management</h3>
+            <input type="text" placeholder="Start Location: place/region">
+            <input type="text" placeholder="End Location: place/region">
+            <div class="btn-group w-100 mb-2">
+                <button type="button" class="btn btn-outline-secondary">Pentagon</button>
+                <button type="button" class="btn btn-outline-secondary">Square</button>
+            </div>
+            <div class="btn-group w-100 mb-2">
+                <button type="button" class="btn btn-primary">Create Fence</button>
+                <button type="button" class="btn btn-primary">SAVE</button>
+            </div>
+        </div>
+        <div class="map" id="map"></div>
+        <div class="geofence-monitoring">
+            <h3>Monitoring fence</h3>
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>FENCE ID</th>
+                        <th>IN</th>
+                        <th>OUT</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>1</td>
+                        <td>10</td>
+                        <td>5</td>
+                    </tr>
+                    <tr>
+                        <td>2</td>
+                        <td>8</td>
+                        <td>2</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="footer">
+            <a href="#">Privacy Policy</a>
+            <a href="#">Terms & services</a>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        document.getElementById('sidebarToggle').addEventListener('click', function () {
+            document.getElementById('sidebar').classList.toggle('active');
+            document.getElementById('content').classList.toggle('active');
+        });
+
+        function initMap() {
+            const mapOptions = {
+                zoom: 10,
+                center: { lat: -33.8688, lng: 151.2093 } // Sydney coordinates
+            };
+            const map = new google.maps.Map(document.getElementById('map'), mapOptions);
+        }
+
+        window.onload = initMap;
+    </script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB41DRUbKWJHPxaFjMAwdrzWzbVKartNGg"></script>
+</body>
+</html>
